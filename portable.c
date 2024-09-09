@@ -8,20 +8,12 @@ typedef char BYTE;      /* MUST be an 8-bit value */
 #include "func.h"
 #include "zoo.h"
 
-//long to_long ();
-//int to_int ();
-//int b_to_zooh();
-//int b_to_dir();
-//int splitlong();
-//int splitint();
-
 /**********************
 to_long() converts four consecutive bytes, in order of increasing
 significance, to a long integer.  It is used to make Zoo independent of the
 byte order of the system.
 */
 long to_long(BYTE data[])
-//BYTE data[];
 {
    int i;
    long retval;

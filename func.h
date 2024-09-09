@@ -46,12 +46,14 @@ int cfactor (long org_size, long size_now);
 
 /* Standard functions */
 
-//char *malloc ();
-//int close ();
-//int creat ();
-//int open ();
-//int read ();
-//int unlink ();
-//int write ();
-//long lseek ();
-//unsigned int strlen ();
+/*
+char *malloc ();
+int close ();
+int creat ();
+int open ();
+int read ();
+int unlink ();
+int write ();
+long lseek ();
+unsigned int strlen ();
+*/

@@ -267,12 +267,8 @@ digit string.  The digit string is stored right justified in the
 buffer with leading blanks.  If the supplied number is negative, or if
 overflow occurs, a single '*' is returned.
 */
-
 char *itoa (char pad_ch, long n, char *buf, int buflen)
-//char pad_ch;                  /* leading pad character */
-//long n;                       /* positive long int to convert */
-//char *buf;                    /* buffer to receive digit string */
-//int buflen;                   /* length of buffer */
+
 {
    char *p;
    int i;

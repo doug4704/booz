@@ -18,10 +18,6 @@ only if the symbol FIXFNAME is defined.
 
 extern unsigned int crccode;
 
-//#ifndef TINY
-//int needed ();
-//#endif
-
 #ifdef TINY
 int oozext (char *zoo_path)
 #endif

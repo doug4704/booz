@@ -27,11 +27,6 @@ struct tabentry {
 struct tabentry *table;
 int   gotmem = 0;
 
-//int init_dtab();
-//unsigned rd_dcode();
-//int wr_dchar();
-//int ad_dcode();
-
 unsigned lzd_sp = 0;
 unsigned lzd_stack[STACKSIZE + SPARE];
 
