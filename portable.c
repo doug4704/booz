@@ -8,20 +8,20 @@ typedef char BYTE;      /* MUST be an 8-bit value */
 #include "func.h"
 #include "zoo.h"
 
-long to_long ();
-int to_int ();
-int b_to_zooh();
-int b_to_dir();
-int splitlong();
-int splitint();
+//long to_long ();
+//int to_int ();
+//int b_to_zooh();
+//int b_to_dir();
+//int splitlong();
+//int splitint();
 
 /**********************
 to_long() converts four consecutive bytes, in order of increasing
 significance, to a long integer.  It is used to make Zoo independent of the
 byte order of the system.
 */
-long to_long(data)
-BYTE data[];
+long to_long(BYTE data[])
+//BYTE data[];
 {
    int i;
    long retval;
@@ -37,49 +37,17 @@ BYTE data[];
 to_int() converts two consecutive bytes, in order of increasing
 significance, to an integer, in a machine-independent manner
 */
-int to_int(data)
-BYTE data[];
+int to_int(BYTE data[])
 {
    return (int) (((unsigned) data[0] & 0xff) |
       ((unsigned) (data[1] & 0xff) << 8));
 }
 
-/**********************
-Function rd_zooh() reads a Zoo archive header in a machine-dependent manner,
-from a file handle.
-*/
-int rd_zooh (header, zoo_han)
-struct zoo_header *header;
-int zoo_han;
-{
-   int status;
-   BYTE bytes[SIZ_ZOOH];
-   status = read (zoo_han, (char *) bytes, SIZ_ZOOH);
-   b_to_zooh (header, bytes);
-   return (status);
-}
-
-/**********************
-Function rd_dir() reads a directory entry in a machine-independent manner
-from a handle.
-*/
-int rd_dir(direntry, zoo_han)
-struct direntry *direntry;
-int zoo_han;
-{
-   int status;
-   BYTE bytes[SIZ_DIR];
-   status = read (zoo_han, (char *) bytes, SIZ_DIR);
-   b_to_dir (direntry, bytes);
-   return (status);
-}
 
 /***********************
 b_to_zooh() converts an array of BYTE to a zoo_header structure.
 */
-int b_to_zooh (zoo_header, bytes)
-struct zoo_header *zoo_header;
-BYTE bytes[];
+void b_to_zooh (struct zoo_header *zoo_header, BYTE bytes[])
 {
    int i;
    for (i = 0; i < SIZ_TEXT; i++)
@@ -93,10 +61,22 @@ BYTE bytes[];
    zoo_header->minor_ver = bytes[MINV_I];
 }
 
+/**********************
+Function rd_zooh() reads a Zoo archive header in a machine-dependent manner,
+from a file handle.
+*/
+int rd_zooh (struct zoo_header *header, int zoo_han)
+{
+   int status;
+   BYTE bytes[SIZ_ZOOH];
+   status = read (zoo_han, (char *) bytes, SIZ_ZOOH);
+   b_to_zooh (header, bytes);
+   return (status);
+}
+
+
 /* b_to_dir() converts bytes to directory entry structure */
-int b_to_dir(direntry, bytes)
-struct direntry *direntry;
-BYTE bytes[];
+void b_to_dir(struct direntry *direntry, BYTE bytes[])
 {
    int i;
    direntry->lo_tag = to_int(&bytes[DTAG_I]);
@@ -119,3 +99,17 @@ BYTE bytes[];
    for (i = 0; i < FNM_SIZ; i++)
       direntry->fname[i] = bytes[FNAME_I + i];
 }
+/**********************
+Function rd_dir() reads a directory entry in a machine-independent manner
+from a handle.
+*/
+int rd_dir(struct direntry *direntry, int zoo_han)
+{
+   int status;
+   BYTE bytes[SIZ_DIR];
+   status = read (zoo_han, (char *) bytes, SIZ_DIR);
+   b_to_dir (direntry, bytes);
+   return (status);
+}
+
+

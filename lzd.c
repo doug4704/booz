@@ -27,16 +27,15 @@ struct tabentry {
 struct tabentry *table;
 int   gotmem = 0;
 
-int init_dtab();
-unsigned rd_dcode();
-int wr_dchar();
-int ad_dcode();
+//int init_dtab();
+//unsigned rd_dcode();
+//int wr_dchar();
+//int ad_dcode();
 
 unsigned lzd_sp = 0;
 unsigned lzd_stack[STACKSIZE + SPARE];
 
-int push(ch)
-int ch;
+void push(int ch)
 {
    lzd_stack[lzd_sp++] = ch;
    if (lzd_sp >= STACKSIZE)
@@ -66,8 +65,89 @@ unsigned bit_offset;
 unsigned output_offset;
 int in_han, out_han;
 
-int lzd(input_handle, output_handle)
-int input_handle, output_handle;          /* input & output file handles */
+
+void init_dtab()
+{
+   nbits = 9;
+   max_code = 512;
+   free_code = FIRST_FREE;
+}
+
+void wr_dchar (char ch)
+{
+   if (output_offset >= OUTBUFSIZ) {      /* if buffer full */
+      if (out_han != -2) {
+         if (write(out_han, out_buf_adr, output_offset) != output_offset)
+            prterror ('f', "Write error in lzd:wr_dchar\n",
+                                       (char *) 0, (char *) 0);
+      }
+      addbfcrc(out_buf_adr, output_offset);     /* update CRC */
+      output_offset = 0;                  /* restore empty buffer */
+   }
+   out_buf_adr[output_offset++] = ch;        /* store character */
+} /* wr_dchar() */
+
+
+/* adds a code to table */
+void ad_dcode()
+{
+   table[free_code].z_ch = k;                /* save suffix char */
+   table[free_code].next = old_code;         /* save prefix code */
+   free_code++;
+   if (free_code >= max_code) {
+      if (nbits < MAXBITS) {
+         nbits++;
+         max_code = max_code << 1;        /* double max_code */
+      }
+   }
+}
+
+/* rd_dcode() reads a code from the input (compressed) file and returns
+its value. */
+unsigned rd_dcode()
+{
+   register char *ptra, *ptrb;    /* miscellaneous pointers */
+   unsigned word;                     /* first 16 bits in buffer */
+   unsigned byte_offset;
+   char nextch;                           /* next 8 bits in buffer */
+   unsigned ofs_inbyte;               /* offset within byte */
+
+   ofs_inbyte = bit_offset % 8;
+   byte_offset = bit_offset / 8;
+   bit_offset = bit_offset + nbits;
+
+   if (byte_offset >= INBUFSIZ - 5) {
+      int space_left;
+
+      bit_offset = ofs_inbyte + nbits;
+      space_left = INBUFSIZ - byte_offset;
+      ptrb = byte_offset + in_buf_adr;          /* point to char */
+      ptra = in_buf_adr;
+      /* we now move the remaining characters down buffer beginning */
+      while (space_left > 0) {
+         *ptra++ = *ptrb++;
+         space_left--;
+      }
+      if (read(in_han, ptra, byte_offset) == -1)
+         prterror ('f', "I/O error in lzd:rd_dcode\n",
+                               (char *) 0, (char *) 0);
+      byte_offset = 0;
+   }
+   ptra = byte_offset + in_buf_adr;
+   /* NOTE:  "word = *((int *) ptra)" would not be independent of byte order. */
+   word = (unsigned char) *ptra; ptra++;
+   word = word | ((unsigned char) *ptra) << 8; ptra++;
+
+   nextch = *ptra;
+   if (ofs_inbyte != 0) {
+      /* shift nextch right by ofs_inbyte bits */
+      /* and shift those bits right into word; */
+      word = (word >> ofs_inbyte) | (((unsigned)nextch) << (16-ofs_inbyte));
+   }
+   return (word & masks[nbits]);
+} /* rd_dcode() */
+
+int lzd(int input_handle, int output_handle)
 {
    in_han = input_handle;                 /* make it avail to other fns */
    out_han = output_handle;               /* ditto */
@@ -134,83 +214,5 @@ loop:
    goto loop;
 } /* lzd() */
 
-/* rd_dcode() reads a code from the input (compressed) file and returns
-its value. */
-unsigned rd_dcode()
-{
-   register char *ptra, *ptrb;    /* miscellaneous pointers */
-   unsigned word;                     /* first 16 bits in buffer */
-   unsigned byte_offset;
-   char nextch;                           /* next 8 bits in buffer */
-   unsigned ofs_inbyte;               /* offset within byte */
 
-   ofs_inbyte = bit_offset % 8;
-   byte_offset = bit_offset / 8;
-   bit_offset = bit_offset + nbits;
 
-   if (byte_offset >= INBUFSIZ - 5) {
-      int space_left;
-
-      bit_offset = ofs_inbyte + nbits;
-      space_left = INBUFSIZ - byte_offset;
-      ptrb = byte_offset + in_buf_adr;          /* point to char */
-      ptra = in_buf_adr;
-      /* we now move the remaining characters down buffer beginning */
-      while (space_left > 0) {
-         *ptra++ = *ptrb++;
-         space_left--;
-      }
-      if (read(in_han, ptra, byte_offset) == -1)
-         prterror ('f', "I/O error in lzd:rd_dcode\n",
-                               (char *) 0, (char *) 0);
-      byte_offset = 0;
-   }
-   ptra = byte_offset + in_buf_adr;
-   /* NOTE:  "word = *((int *) ptra)" would not be independent of byte order. */
-   word = (unsigned char) *ptra; ptra++;
-   word = word | ((unsigned char) *ptra) << 8; ptra++;
-
-   nextch = *ptra;
-   if (ofs_inbyte != 0) {
-      /* shift nextch right by ofs_inbyte bits */
-      /* and shift those bits right into word; */
-      word = (word >> ofs_inbyte) | (((unsigned)nextch) << (16-ofs_inbyte));
-   }
-   return (word & masks[nbits]);
-} /* rd_dcode() */
-
-int init_dtab()
-{
-   nbits = 9;
-   max_code = 512;
-   free_code = FIRST_FREE;
-}
-
-int wr_dchar (ch)
-char ch;
-{
-   if (output_offset >= OUTBUFSIZ) {      /* if buffer full */
-      if (out_han != -2) {
-         if (write(out_han, out_buf_adr, output_offset) != output_offset)
-            prterror ('f', "Write error in lzd:wr_dchar\n",
-                                       (char *) 0, (char *) 0);
-      }
-      addbfcrc(out_buf_adr, output_offset);     /* update CRC */
-      output_offset = 0;                  /* restore empty buffer */
-   }
-   out_buf_adr[output_offset++] = ch;        /* store character */
-} /* wr_dchar() */
-
-/* adds a code to table */
-int ad_dcode()
-{
-   table[free_code].z_ch = k;                /* save suffix char */
-   table[free_code].next = old_code;         /* save prefix code */
-   free_code++;
-   if (free_code >= max_code) {
-      if (nbits < MAXBITS) {
-         nbits++;
-         max_code = max_code << 1;        /* double max_code */
-      }
-   }
-}

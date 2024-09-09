@@ -47,10 +47,7 @@ unsigned int crctab[] = {
    0x4100, 0x81c1, 0x8081, 0x4040
 };
 
-int addbfcrc(buffer,count)
-char *buffer;
-int count;
-
+void addbfcrc(char *buffer, int count)
 {
    register unsigned int localcrc;
    register int i;
@@ -59,4 +56,6 @@ int count;
    for (i=0; i<count; i++)
       localcrc = (localcrc>>8) ^ crctab[(localcrc ^ (buffer[i])) & 0x00ff];
    crccode = localcrc;
+
+   return;
 }

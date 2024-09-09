@@ -34,9 +34,9 @@ one of these symbols.  The effects are:
 */
 
 /* Only one of the three following symbols should be defined */
-#define TINY
-/* #define SMALL */
-/* #define BIG */
+//#define TINY
+//#define SMALL
+#define BIG
 
 /* Define FIXFNAME to activate the fixfname() function that converts
 filename syntax to be acceptable to the host system */

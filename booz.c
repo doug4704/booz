@@ -34,9 +34,7 @@ The contents of this file are hereby released to the public domain.
 #include "func.h"
 #include "zoo.h"
 
-main(argc,argv)
-register int argc;
-register char **argv;
+main(int argc, char **argv)
 {
 #ifdef TINY
    static char usage[]=
@@ -107,8 +105,7 @@ This function prints a string to the standard output handle without
 using printf() or the standard I/O library.  If a null string, nothing
 is printed (not even the null character).
 */
-int putstr (str)
-register char *str;
+void putstr (char *str)
 {
    if (str != (char *) 0)
       write (1, str, strlen(str));
@@ -125,10 +122,7 @@ of the error and the result.
    'f'   fatal error -- program exits
 */
 
-int prterror (level, a, b, c)
-int level;
-char *a, *b, *c;
-
+void prterror (int level, char *a, char *b, char *c)
 {
 
 #ifdef DEBUG
@@ -166,9 +160,7 @@ The global variable crccode is updated.
 */
 extern char out_buf_adr[];
 
-int getfile(input_han, output_han, count)
-int input_han, output_han;
-long count;
+int getfile(int input_han, int output_han, long count)
 {
    register int how_much;
 
@@ -190,21 +182,6 @@ long count;
 
 #ifndef TINY
 
-int needed (fname, argc, argv)
-char *fname;
-int argc;
-char *argv[];
-{
-   register int i;
-   if (argc == 0)
-      return (1);
-   for (i = 0; i < argc; i++) {
-      if (match (fname, argv[i]))
-         return (1);
-   }
-   return (0);
-}
-
 /***********************/
 /*
 match() compares a pattern with a string.  Wildcards accepted in
@@ -218,8 +195,7 @@ Computing Activities.  Taken from the source code for C-Kermit version
 4C.
 */
 
-int match (string, pattern)
-register char *string, *pattern;
+int match (char *string, char *pattern)
 {
    char *psave,*ssave;        /* back up pointers for failure */
    psave = ssave = ((char *) 0);
@@ -242,17 +218,28 @@ register char *string, *pattern;
    }
 }
 
+int needed (char *fname, int argc, char *argv[])
+{
+   register int i;
+   if (argc == 0)
+      return (1);
+   for (i = 0; i < argc; i++) {
+      if (match (fname, argv[i]))
+         return (1);
+   }
+   return (0);
+}
+
 #endif /* ndef TINY */
 
-int memerr()
+void memerr()
 {
-   prterror ('f', "Ran out of memory\n");
+   prterror ('f', "Ran out of memory\n", ((char *) 0), ((char *) 0));
 }
 
 #ifdef BIG
 /* cfactor() calculates the compression factor given a directory entry */
-int cfactor (org_size, size_now)
-long org_size, size_now;
+int cfactor (long org_size, long size_now)
 {
    register int size_factor;
 
@@ -281,11 +268,11 @@ buffer with leading blanks.  If the supplied number is negative, or if
 overflow occurs, a single '*' is returned.
 */
 
-char *itoa (pad_ch, n, buf, buflen)
-char pad_ch;                  /* leading pad character */
-long n;                       /* positive long int to convert */
-char *buf;                    /* buffer to receive digit string */
-int buflen;                   /* length of buffer */
+char *itoa (char pad_ch, long n, char *buf, int buflen)
+//char pad_ch;                  /* leading pad character */
+//long n;                       /* positive long int to convert */
+//char *buf;                    /* buffer to receive digit string */
+//int buflen;                   /* length of buffer */
 {
    char *p;
    int i;

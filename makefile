@@ -2,13 +2,17 @@
 
 OOZOBJS = addbfcrc.o lzd.o booz.o oozext.o portable.o
 
-cswitch = -c -O -DNIX_IO
+cswitch = -std=c89 -c -O -DNIX_IO
 
 .c.o :
-       cc $(cswitch) $*.c
+	cc $(cswitch) $*.c
+
+all: booz
+
+clean: booz
 
 booz : $(OOZOBJS)
-       cc $(OOZOBJS) -o booz
+	cc $(OOZOBJS) -o booz
 
 booz.o : options.h zoo.h func.h booz.c
 
@@ -17,3 +21,4 @@ lzd.o : options.h func.h lzd.c
 oozext.o : options.h zoo.h oozio.h func.h oozext.c
 
 portable.o : func.h zoo.h portable.c
+

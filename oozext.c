@@ -18,28 +18,20 @@ only if the symbol FIXFNAME is defined.
 
 extern unsigned int crccode;
 
-#ifndef TINY
-int needed ();
-#endif
+//#ifndef TINY
+//int needed ();
+//#endif
 
 #ifdef TINY
-int oozext (zoo_path)
-char *zoo_path;
+int oozext (char *zoo_path)
 #endif
 
 #ifdef SMALL
-int oozext (zoo_path, argc, argv)
-char *zoo_path;
-int argc;
-char *argv[];
+int oozext (char *zoo_path, int argc, char *argv[])
 #endif
 
 #ifdef BIG
-int oozext (zoo_path, option, argc, argv)
-char *zoo_path;
-char *option;
-int argc;
-char *argv[];
+void oozext (char *zoo_path, char *option, int argc, char *argv[])
 #endif
 
 {
